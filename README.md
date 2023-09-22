@@ -1,2 +1,2 @@
 # WildSentry
-Uses reinforcement learning to optimise the deployment of wildlife conservation resources in a specific region, such as a wildlife reserve. 
+Uses reinforcement learning to enhance environmentla monitoring and conservation efforts in ecosystetms. The objective is to improve conservation strategies, early detection of threats, and resource allocation without relying on physical patrol teams.
