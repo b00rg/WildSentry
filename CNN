@@ -1,0 +1,58 @@
+# Convolutional Neural Network (CNN) used to identify changes in satellite imagery
+
+training_dir = "insert/training/data/dir/here"
+validation_dir = "insert/validation/data/dir/here"
+model_checkpoint = "insert/model/checkpoint/dir/here"
+
+# Creating test data generator using image_dataset_from_directory function
+test = image_dataset_from_directory(
+	training_dir,
+  labels="inferred",
+  label_mode="categorical",
+  color_mode="rgb",
+  batch_size=32,
+  image_size=(299, 299),
+  shuffle=True,
+  seed=123,
+  interpolation="bilinear",
+  follow_links=False,
+  crop_to_aspect_ratio=True
+)
+
+# Creating validation data generator using image_dataset_from_directory function
+val = tf.keras.preprocessing.image_dataset_from_directory(
+  validation_dir,
+  labels="inferred",
+  label_mode="categorical",
+  color_mode="rgb",
+  batch_size=32,
+  image_size=(224, 224),
+  shuffle=False,
+  seed=123,
+  interpolation="bilinear",
+  follow_links=False,
+  crop_to_aspect_ratio=True
+)
+
+# Model Checkpoint
+mc = tf.keras.callbacks.ModelCheckpoint(
+    filepath="model/checkpoint/dir",
+    monitor="val_loss",
+    verbose=1,
+    save_best_only=True,
+    save_weights_only=True,
+    mode="auto",
+    save_freq="epoch",
+    options=None,
+)
+
+# Creating an EarlyStopping callback to stop training if validation loss stops improving 
+es = tf.keras.callbacks.EarlyStopping(
+    monitor="val_loss",
+    min_delta=0.01,
+    patience=1,
+    verbose=1,
+    mode="auto",
+    baseline=None,
+    restore_best_weights=True
+)
