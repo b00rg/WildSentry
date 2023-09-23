@@ -1,4 +1,4 @@
-# Convolutional Neural Network (CNN) used to identify changes in satellite imagery
+# Convolutional Neural Network (CNN) used to identify anomalies in satellite imagery
 
 training_dir = "insert/training/data/dir/here"
 validation_dir = "insert/validation/data/dir/here"
@@ -56,3 +56,4 @@ es = tf.keras.callbacks.EarlyStopping(
     baseline=None,
     restore_best_weights=True
 )
+
