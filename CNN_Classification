@@ -1,4 +1,4 @@
-# Siamese Neural Network used to identify what anomaly is occuring
+# Convolutional Neural Network used to identify what type of anomaly is occuring (i.e. classification)
 
 training_dir = "insert/training/data/dir/here"
 validation_dir = "insert/validation/data/dir/here"
@@ -26,7 +26,7 @@ val = tf.keras.preprocessing.image_dataset_from_directory(
   label_mode="categorical",
   color_mode="rgb",
   batch_size=32,
-  image_size=(224, 224),
+  image_size=(299, 299),
   shuffle=False,
   seed=123,
   interpolation="bilinear",
@@ -57,12 +57,16 @@ es = tf.keras.callbacks.EarlyStopping(
     restore_best_weights=True
 )
 
-# Creating a Siamese NN model 
-
-model = 
+model = tf.keras.applications.ResNet152(
+    include_top=True,
+    weights=None,
+    input_tensor=None,
+    input_shape=None,
+    pooling="max"
+)
 
 # compiling
-model.compile(loss='binary_crossentropy',
+model.compile(loss='categorical_crossentropy',
               optimizer='adam')
 
 calling = model.fit(test,
