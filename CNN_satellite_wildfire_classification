@@ -1,4 +1,8 @@
 # Convolutional Neural Network used to identify if an anomaly is occuring
+import tensorflow as tf
+from tensorflow.keras.layers.experimental import preprocessing
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+
 
 training_dir = "insert/training/data/dir/here"
 validation_dir = "insert/validation/data/dir/here"
@@ -23,7 +27,7 @@ test = image_dataset_from_directory(
 val = tf.keras.preprocessing.image_dataset_from_directory(
   validation_dir,
   labels="inferred",
-  label_mode="categorical",
+  label_mode="binary",
   color_mode="rgb",
   batch_size=32,
   image_size=(299, 299),
@@ -66,7 +70,7 @@ model = tf.keras.applications.ResNet152(
 )
 
 # compiling
-model.compile(loss='categorical_crossentropy',
+model.compile(loss='binary_crossentropy',
               optimizer='adam')
 
 calling = model.fit(test,
