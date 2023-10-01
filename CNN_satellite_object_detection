@@ -1,4 +1,4 @@
-# Convolutional Neural Network (CNN) used to identify anomalies in satellite imagery
+# Convolutional Neural Network (CNN) used to identify objects from satellite images
 
 training_dir = "insert/training/data/dir/here"
 validation_dir = "insert/validation/data/dir/here"
