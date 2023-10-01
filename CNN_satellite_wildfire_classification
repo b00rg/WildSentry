@@ -1,4 +1,4 @@
-# Convolutional Neural Network used to identify what type of anomaly is occuring (i.e. classification)
+# Convolutional Neural Network used to identify if an anomaly is occuring
 
 training_dir = "insert/training/data/dir/here"
 validation_dir = "insert/validation/data/dir/here"
