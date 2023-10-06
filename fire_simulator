@@ -1,0 +1,118 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from matplotlib import colors
+from scipy.stats import skewnorm
+
+# fire training parameters based on the environment changing
+# the humidity, wind direction, and temperature would have to be taken from weather reports in the area
+rng = np.random.default_rng(seed=42)
+# for skewed distribution
+alpha = -5
+# Displacements from a cell to its eight nearest neighbors
+neighbourhood = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+
+def normalise_data(data):
+    return (data - np.min(data)) / (np.max(data)) - np.min(data)
+
+def skewed_left(data):
+    return skewnorm.rvs(alpha, data)
+
+# For training reasons, the relevant  below is randomised on a normal distribution probability
+# As this model is a prototype, these training inputs may not be true to life
+# For the actual model, these randomised numbers would be set as inputs directly from the fire
+# where 0 = N, 1 = NE, 2 = E, 3 = SE, 4 = S, 5 = SW, 6 = W, 7 = NW
+# skewed distribution to the left for the wind strength 
+windDirection = rng.choice(neighbourhood, size=1)
+windStrength = skewed_left(rng.integers(low=0, high=120, size=1))
+
+# where 20 = 20% humidity
+humidity = rng.integers(low = 20, high = 100, size = 1) 
+
+# where 50 = 50 degrees celsius
+# normalised temperature to ensure the model is trained on an average European temp
+temperature = rng.normal.integers(low = -20, high = 50) 
+
+
+# normalising the data between [0,1]
+humidityBias = normalise_data(humidity)
+temperatureBias = normalise_data(temperature)
+windStrengthBias = normalise_data(windStrength)
+
+# Constants for cell states
+EMPTY, TREE, FIRE, BURNT = 0, 1, 2, 3
+
+# Define colors for visualization
+colors_list = [(0.2, 0, 0), (0, 0.5, 0), (1, 0, 0), (0.7, 0, 0)]  # Brown, Dark Green, Orange, Gray
+cmap = colors.ListedColormap(colors_list)
+bounds = [0, 1, 2, 3]
+norm = colors.BoundaryNorm(bounds, cmap.N)
+
+# Figuring out which nearest neighbour co-ordinate corresponds to the generated wind direction
+windDirectionBias = neighbourhood[windDirection] 
+
+# Define fire persistence time (in iterations)
+# here, the humidity and fire time are taken into account to reduce or increase the persistance
+fire_persistence = 40 * humidityBias * temperatureBias
+
+def iterate(X, p_tree_grow=0.01):
+    global f, humidity, temperature
+    """Iterate the forest according to the forest-fire rules."""
+
+    f = f * ((100 - humidity)/20)
+    f = f * (1 + temperature/ 50)
+ 
+    ny, nx = X.shape
+    X1 = np.zeros((ny, nx), dtype=int)
+
+    for ix in range(1, nx - 1):
+        for iy in range(1, ny - 1):
+            if X[iy, ix] == EMPTY:
+                if np.random.random() <= p:
+                    X1[iy, ix] = TREE
+            elif X[iy, ix] == TREE and X[iy,ix] != BURNT:
+                X1[iy, ix] = TREE
+                for dx, dy in neighbourhood:
+                    if X[iy + dy, ix + dx] == FIRE:
+                        X1[iy, ix] = FIRE
+                        break
+                else:
+                    if np.random.random() <= f:
+                        X1[iy, ix] = FIRE
+            elif X[iy, ix] == FIRE:
+                # Decrement the fire persistence time
+                if np.random.randint(0, fire_persistence) != 0:
+                    X1[iy, ix] = FIRE
+                else:
+                    X1[iy, ix] = BURNT
+
+    # have the windStrengthBias be the chance it will go in that direction
+        threshold = np.random.rand()
+
+        if windStrengthBias > threshold: 
+            # the fire goes in the direction of the wind 
+            return windDirectionBias
+        else: 
+            return X1
+
+# Simulation Parameters
+forest_fraction = 0.5
+p, f = 0.00, 0.0001
+nx, ny = 100, 100
+X = np.zeros((ny, nx), dtype=int)
+X[1:ny-1, 1:nx-1] = np.random.randint(0, 2, size=(ny-2, nx-2))
+X[1:ny-1, 1:nx-1] = np.random.random(size=(ny-2, nx-2)) < forest_fraction
+
+fig = plt.figure(figsize=(25/3, 6.25))
+ax = fig.add_subplot(111)
+ax.set_axis_off()
+im = ax.imshow(X, cmap=cmap, norm=norm)
+
+def animate(i):
+    im.set_data(animate.X)
+    animate.X = iterate(animate.X)
+    
+animate.X = X
+interval = 100
+anim = animation.FuncAnimation(fig, animate, interval=interval, frames=200)
+plt.show()
