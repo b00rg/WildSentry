@@ -78,4 +78,3 @@ calling = model.fit(test,
                     shuffle=True,
                     verbose=1,
                     callbacks=[mc,es])
-
