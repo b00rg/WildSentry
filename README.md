@@ -1,2 +1,2 @@
 # WildSentry
-Uses reinforcement learning to detect wildfires, simulate their spread, and deploy an agent-based model on how best to stop the spread. 
+Uses reinforcement learning to detect wildfires, collect information about the environment, and deploy an agent-based model on how best to stop the spread. 
