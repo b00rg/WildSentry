@@ -1,42 +1,40 @@
-# Convolutional Neural Network (CNN) used to identify objects from satellite images
-
-training_dir = "insert/training/data/dir/here"
-validation_dir = "insert/validation/data/dir/here"
-model_checkpoint = "insert/model/checkpoint/dir/here"
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import image_dataset_from_directory
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 
 # Creating test data generator using image_dataset_from_directory function
 test = image_dataset_from_directory(
-	training_dir,
-  labels="inferred",
-  label_mode="categorical",
-  color_mode="rgb",
-  batch_size=32,
-  image_size=(299, 299),
-  shuffle=True,
-  seed=123,
-  interpolation="bilinear",
-  follow_links=False,
-  crop_to_aspect_ratio=True
+    "training_data_set",
+    labels="inferred",
+    label_mode="categorical",
+    color_mode="rgb",
+    batch_size=32,
+    image_size=(299, 299),
+    shuffle=False,
+    seed=123,
+    interpolation="bilinear",
+    follow_links=False,
+    crop_to_aspect_ratio=True
 )
 
 # Creating validation data generator using image_dataset_from_directory function
 val = tf.keras.preprocessing.image_dataset_from_directory(
-  validation_dir,
-  labels="inferred",
-  label_mode="categorical",
-  color_mode="rgb",
-  batch_size=32,
-  image_size=(224, 224),
-  shuffle=False,
-  seed=123,
-  interpolation="bilinear",
-  follow_links=False,
-  crop_to_aspect_ratio=True
+    "validation_data_set",
+    labels="inferred",
+    label_mode="categorical",
+    color_mode="rgb",
+    batch_size=32,
+    image_size=(224, 224),
+    shuffle=False,
+    seed=123,
+    interpolation="bilinear",
+    follow_links=False,
+    crop_to_aspect_ratio=True
 )
 
 # Model Checkpoint
 mc = tf.keras.callbacks.ModelCheckpoint(
-    filepath="model/checkpoint/dir",
+    filepath="epoch_data_checkpoint",
     monitor="val_loss",
     verbose=1,
     save_best_only=True,
@@ -44,6 +42,20 @@ mc = tf.keras.callbacks.ModelCheckpoint(
     mode="auto",
     save_freq="epoch",
     options=None,
+)
+
+# Creating an AUC metric for the model
+tf.keras.metrics.AUC(
+    num_thresholds=200,
+    curve="ROC",
+    summation_method="interpolation",
+    name="AUC",
+    dtype=None,
+    thresholds=None,
+    multi_label=True,
+    num_labels=7,
+    label_weights=None,
+    from_logits=False,
 )
 
 # Creating an EarlyStopping callback to stop training if validation loss stops improving 
@@ -57,3 +69,30 @@ es = tf.keras.callbacks.EarlyStopping(
     restore_best_weights=True
 )
 
+# Creating a TensorBoard callback for visualizing training progress
+tb = tf.keras.callbacks.TensorBoard(
+    log_dir=r"tensorlog",
+    histogram_freq=0,
+    write_graph=True,
+    write_images=True,
+    write_steps_per_second=True,
+    update_freq="batch",
+    profile_batch=1,
+    embeddings_freq=0,
+    embeddings_metadata=None
+)
+
+# Creating a ResNet model with 5 output classes and no pre-trained weights
+
+model = tf.keras.applications.ResNet50V2(classes=5,
+                                       weights=None)
+
+# model.summary()
+model.compile(loss='categorical_crossentropy',
+              optimizer='adam')
+
+H = model.fit(test,
+              epochs=100,
+              shuffle=True,
+              verbose=1,
+              callbacks=[mc,es,tb])
