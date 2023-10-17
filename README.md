@@ -1,7 +1,4 @@
 # WildSentry
-Uses neural networks and reinforcement learning to detect wildfires, collect information about the environment, and deploy an agent-based model on how best to stop the spread. 
-
-
 WildSentry employs a three-step process to identify and mitigate wildfires:
 
 1. Initial wildfire detection involves satellite imagery analysis using ResNet.
